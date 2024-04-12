@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link List Downloader</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer type="module" src="main.js"></script>
+</head>
+<body>
+    <form id="links-form">
+        <input name="file-input" type="file" multiple accept="text/plain">
+        <textarea name="text-input" cols="30" rows="10"></textarea>
+        <button type="submit">Download</button>
+    </form>
+
+    <!-- templates -->
+    <template id="file-download-progress-template">
+        <label for=""></label>
+        <progress id="" max="100" value="0"></progress>
+        <span id="text-progress">0%</span>
+        <input id="progress-type" type="checkbox">
+        <hr id="progress-separator">
+    </template>
+</body>
+</html>

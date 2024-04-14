@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link List Downloader</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="form.css">
+    <script defer type="module" src="components/componentImports.mjs"></script>
+    <script defer type="module" src="main.mjs"></script>
+</head>
+<body>
+    <h1 class="page-title">Link Downloader</h1>
+    <main>
+        <form id="links-form">
+            <textarea placeholder="Direct download links or links to text files with download links" name="text-input" cols="30" rows="10"></textarea>
+            <div class="separator">and/or</div>
+            <input name="file-input" type="file" multiple accept="text/plain">
+            <button type="submit">Download</button>
+        </form>
+        <div class="separator">Total Progress</div>
+        <div class="separator">Preview</div>
+    </main>
+</body>
+</html>

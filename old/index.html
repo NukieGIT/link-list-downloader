@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link List Downloader</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer type="module" src="main.js"></script>
+</head>
+<body>
+    <form id="links-form">
+        <input name="file-input" type="file" multiple accept="text/plain">
+        <textarea name="text-input" cols="30" rows="10"></textarea>
+        <button type="submit">Download</button>
+    </form>
+
+    <img style="width: auto; height: 300px; scale: -1;" src="https://media1.tenor.com/m/557GUrcXp14AAAAd/jinx-cat-javascript.gif" alt="uwu">
+
+    <!-- templates -->
+    <template id="file-download-progress-template">
+        <label id="file-download-progress__title" for=""></label>
+        <progress id="" max="100" value="0"></progress>
+        <label class="toggleable">
+            <span id="text-progress">0%</span>
+            <input hidden id="progress-type" type="checkbox">
+        </label>
+        <span id="file-size-progress">Loading...</span>
+        <br>
+        <br>
+        <br>
+    </template>
+
+    <template id="single-file-download-progress-template">
+        <label for="" class="toggleable">
+            <span id="download-target">filename</span>
+            <input hidden type="download-target-type" type="checkbox">
+        </label>
+        <progress id="" max="100"></progress>
+        <label class="toggleable">
+            <span id="text-progress">0%</span>
+            <input hidden id="progress-type" type="checkbox">
+        </label>
+        <br>
+    </template>
+</body>
+</html>

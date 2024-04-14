@@ -32,10 +32,10 @@ export function isValidUrl(url) {
  * Formats the given number of bytes into a human-readable string representation.
  * @param {number} bytes - The number of bytes to format.
  * @param {number} [decimals=2] - The number of decimal places to round the result to (default is 2).
- * @returns {string} The formatted string representation of the bytes.
+ * @returns {{value: number, unit: string}} The formatted bytes.
  */
 export function formatBytes(bytes, decimals = 2) {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return { value: 0, unit: 'Bytes' };
 
     const k = 1024;
     const dm = decimals < 0 ? 0 : decimals;
@@ -43,7 +43,10 @@ export function formatBytes(bytes, decimals = 2) {
 
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    return {
+        value: parseFloat((bytes / Math.pow(k, i)).toFixed(dm)),
+        unit: sizes[i]
+    }
 }
 
 /**

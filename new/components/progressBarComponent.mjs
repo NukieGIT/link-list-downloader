@@ -15,7 +15,7 @@ export class ProgressBarComponent extends HTMLElement {
     /**
      * @type {(value: number, max: number) => {value: number, max: number, unit: string}}
      */
-    #unitConverter
+    #unitConverter = (value, max) => ({ value, max, unit: "" })
 
     constructor() {
         super();
@@ -31,7 +31,7 @@ export class ProgressBarComponent extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ["value", "max"]
+        return ["value", "max", "percentage-decimal-rounding"]
     }
 
     /**
@@ -56,6 +56,14 @@ export class ProgressBarComponent extends HTMLElement {
         return parseFloat(this.getAttribute("max")) || 100;
     }
 
+    set percentageRounding(value) {
+        this.setAttribute("percentage-decimal-rounding", value.toString())
+    }
+
+    get percentageRounding() {
+        return parseFloat(this.getAttribute("percentage-decimal-rounding")) || 0
+    }
+
     set unitConverter(converter) {
         this.#unitConverter = converter
     }
@@ -75,6 +83,7 @@ export class ProgressBarComponent extends HTMLElement {
         switch (name) {
             case "value":
             case "max":
+            case "percentage-decimal-rounding":
                 this.#updateProgress();
                 break;
         }
@@ -86,7 +95,10 @@ export class ProgressBarComponent extends HTMLElement {
 
         const converted = this.#unitConverter(this.value, this.max)
         
-        this.#textProgressElement.text = `${this.value / this.max*100}%`
+        const percentage = this.value / this.max * 100
+        const roundedPercentage = parseFloat(percentage.toFixed(this.percentageRounding))
+
+        this.#textProgressElement.text = `${roundedPercentage}%`
         this.#textProgressElement.altText = `${converted.value} / ${converted.max}${converted.unit !== "" ? ` ${converted.unit}` : ""}`
     }
 }

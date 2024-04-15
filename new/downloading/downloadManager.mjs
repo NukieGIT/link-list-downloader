@@ -7,6 +7,9 @@ export default class DownloadManager {
 
     #downloadEvents
 
+    /**
+     * @returns {import('globalTypes.mjs').EventTargetWithoutDispatch}
+     */
     get downloadEvents() {
         return {
             addEventListener: this.#downloadEvents.addEventListener.bind(this.#downloadEvents),
@@ -14,6 +17,9 @@ export default class DownloadManager {
         }
     }
 
+    /**
+     * @param {string[]} urls
+     */
     constructor(urls) {
         this.#urls = urls
         this.#urlDownloaders = []
@@ -29,11 +35,15 @@ export default class DownloadManager {
         }
     }
 
-    async downloadAll(urls) {
-        this.#urls = urls
+    async downloadAll() {
+        for (const urlDownloader of this.#urlDownloaders) {
+            await urlDownloader.download()
+        }
     }
 
     async fetchTotalFileSize() {
-        
+        for (const urlDownloader of this.#urlDownloaders) {
+            await urlDownloader.fetchFileSize()
+        }
     }
 }

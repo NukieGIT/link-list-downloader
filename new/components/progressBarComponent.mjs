@@ -11,7 +11,11 @@ export class ProgressBarComponent extends HTMLElement {
      * @type {ToggleableTextComponent}
      */
     #textProgressElement
-    #updateProgressBound
+
+    /**
+     * @type {(value: number, max: number) => {value: number, max: number, unit: string}}
+     */
+    #unitConverter
 
     constructor() {
         super();
@@ -24,12 +28,10 @@ export class ProgressBarComponent extends HTMLElement {
 
         this.#progressElement = shadowRoot.querySelector('#progress');
         this.#textProgressElement = shadowRoot.querySelector('#text-progress');
-
-        this.#updateProgressBound = this.#updateProgress.bind(this);
     }
 
     static get observedAttributes() {
-        return ["value", "max", "unit"]
+        return ["value", "max"]
     }
 
     /**
@@ -54,22 +56,26 @@ export class ProgressBarComponent extends HTMLElement {
         return parseFloat(this.getAttribute("max")) || 100;
     }
 
-    set unit(value) {
-        this.setAttribute("unit", value);
+    set unitConverter(converter) {
+        this.#unitConverter = converter
     }
 
-    get unit() {
-        return this.getAttribute("unit") ?? "";
+    get unitConverter() {
+        return this.#unitConverter
     }
 
+    /**
+     * @param {string} name
+     * @param {string} oldValue
+     * @param {string} newValue
+     */
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
 
         switch (name) {
             case "value":
             case "max":
-            case "unit":
-                this.#updateProgressBound();
+                this.#updateProgress();
                 break;
         }
     }
@@ -77,9 +83,11 @@ export class ProgressBarComponent extends HTMLElement {
     #updateProgress() {
         this.#progressElement.value = this.value;
         this.#progressElement.max = this.max;
+
+        const converted = this.#unitConverter(this.value, this.max)
         
         this.#textProgressElement.text = `${this.value / this.max*100}%`
-        this.#textProgressElement.altText = `${this.value} / ${this.max}${this.unit !== "" ? ` ${this.unit}` : ""}`
+        this.#textProgressElement.altText = `${converted.value} / ${converted.max}${converted.unit !== "" ? ` ${converted.unit}` : ""}`
     }
 }
 

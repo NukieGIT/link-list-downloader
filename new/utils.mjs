@@ -28,25 +28,39 @@ export function isValidUrl(url) {
     }
 }
 
+export const DATA_UNITS = /** @type {const} */ (['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']);
+
 /**
- * Formats the given number of bytes into a human-readable string representation.
- * @param {number} bytes - The number of bytes to format.
- * @param {number} [decimals=2] - The number of decimal places to round the result to (default is 2).
- * @returns {{value: number, unit: string}} The formatted bytes.
+ * Formats the given data size to a human-readable format.
+ * 
+ * @param {number} data - The data size to be formatted.
+ * @param {typeof DATA_UNITS[number]} from - The data unit of the given data size.
+ * @param {typeof DATA_UNITS[number]} to - The data unit to which the data size should be converted.
+ * @returns {number} The formatted data size.
  */
-export function formatBytes(bytes, decimals = 2) {
-    if (bytes === 0) return { value: 0, unit: 'Bytes' };
+export function convertDataUnit(data, from, to) {
+    const fromIndex = DATA_UNITS.indexOf(from)
+    const toIndex = DATA_UNITS.indexOf(to)
 
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    return {
-        value: parseFloat((bytes / Math.pow(k, i)).toFixed(dm)),
-        unit: sizes[i]
+    if (fromIndex === -1 || toIndex === -1) {
+        throw new Error('Invalid data unit')
     }
+
+    return data / Math.pow(1024, toIndex - fromIndex)
+}
+
+/**
+ * Retrieves the data unit for the given data size.
+ * 
+ * @param {number} data - The data size to be formatted.
+ * @returns {typeof DATA_UNITS[number]} The formatted data with unit.
+ */
+export function getDataUnit(data) {
+    if (data === 0) return "Bytes"
+
+    const index = Math.floor(Math.log(data) / Math.log(1024))
+
+    return DATA_UNITS[index]
 }
 
 /**

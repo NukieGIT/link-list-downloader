@@ -102,7 +102,12 @@ export default class UrlDownloader {
     async download() {
         this.#downloadEvents.dispatchEvent(new CustomEvent('downloadstart', { detail: { fileName: this.#fileName } }));
         
-        const response = await fetch(this.#url);
+        const response = await fetch(this.#url)
+
+        if (!response.ok) {
+            this.#downloadEvents.dispatchEvent(new CustomEvent('downloaderror', { detail: { fileName: this.#fileName, status: response.status, statusText: response.statusText } }));
+            throw new FetchError(response.status, response.statusText);
+        }
 
         const reader = new CountBlobFromResponseLengthProgress(response)
         reader.progressEvents.addEventListener('progress', this.#onReaderProgress.bind(this))
@@ -119,5 +124,26 @@ export default class UrlDownloader {
      */
     #onReaderProgress(event) {
         this.#downloadEvents.dispatchEvent(new CustomEvent('downloadprogress', { detail: { fileName: this.#fileName, length: event.detail.length } }));
+    }
+}
+
+export class FetchError extends Error {
+    /**
+     * @type {number}
+     */
+    #status
+    /**
+     * @type {string}
+     */
+    #statusText
+
+    /**
+     * @param {number} status
+     * @param {string} statusText
+     */
+    constructor(status, statusText) {
+        super(`Fetch failed with status ${status} ${statusText}`);
+        this.#status = status;
+        this.#statusText = statusText;
     }
 }

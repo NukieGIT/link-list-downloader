@@ -1,20 +1,56 @@
 import UrlDownloader from './urlDownloader.mjs'
 
+/**
+ * @import { EventTargetWithoutDispatch } from '/new/globalTypes'
+ */
+
 export default class DownloadManager {
 
+    /**
+     * @type {string[]}
+     */
     #urls
+    /**
+     * @type {UrlDownloader[]}
+     */
     #urlDownloaders
 
+    /**
+     * @type {EventTarget}
+     */
     #downloadEvents
 
     /**
-     * @returns {import('globalTypes.mjs').EventTargetWithoutDispatch}
+     * @type {EventTarget}
+     */
+    #fetchFileSizeEvents
+
+    /**
+     * @returns {EventTargetWithoutDispatch}
      */
     get downloadEvents() {
         return {
             addEventListener: this.#downloadEvents.addEventListener.bind(this.#downloadEvents),
             removeEventListener: this.#downloadEvents.removeEventListener.bind(this.#downloadEvents)
         }
+    }
+
+    /**
+     * @returns {EventTargetWithoutDispatch}
+     */
+    get fetchFileSizeEvents() {
+        return {
+            addEventListener: this.#fetchFileSizeEvents.addEventListener.bind(this.#fetchFileSizeEvents),
+            removeEventListener: this.#fetchFileSizeEvents.removeEventListener.bind(this.#fetchFileSizeEvents)
+        }
+    }
+
+    get urlDownloaderFetchEvents() {
+        return this.#urlDownloaders.map(urlDownloader => urlDownloader.fetchFileSizeEvents)
+    }
+
+    get urlDownloaderDownloadEvents() {
+        return this.#urlDownloaders.map(urlDownloader => urlDownloader.downloadEvents)
     }
 
     /**
@@ -36,14 +72,10 @@ export default class DownloadManager {
     }
 
     async downloadAll() {
-        for (const urlDownloader of this.#urlDownloaders) {
-            await urlDownloader.download()
-        }
+        const results = await Promise.allSettled(this.#urlDownloaders.map(urlDownloader => urlDownloader.download()))
     }
 
     async fetchTotalFileSize() {
-        for (const urlDownloader of this.#urlDownloaders) {
-            await urlDownloader.fetchFileSize()
-        }
+        const results = await Promise.allSettled(this.#urlDownloaders.map(urlDownloader => urlDownloader.fetchFileSize()))
     }
 }

@@ -1,6 +1,10 @@
 import { retrieveFileNameFromUrl } from "../utils.mjs";
 import { CountBlobFromResponseLengthProgress } from "./blobFromResponse.mjs";
 
+/**
+ * @import { EventTargetWithoutDispatch, FetchFileSizeEventTarget } from '/new/globalTypes'
+ */
+
 export default class UrlDownloader {
 
     /**
@@ -21,11 +25,11 @@ export default class UrlDownloader {
     #fetchedFile
 
     /**
-     * @type {EventTarget}
+     * @type {FetchFileSizeEventTarget}
      */
     #fetchFileSizeEvents
     /**
-     * @type {EventTarget}
+     * @type {FetchFileSizeEventTarget}
      */
     #downloadEvents
 
@@ -34,7 +38,7 @@ export default class UrlDownloader {
     }
 
     /**
-     * @returns {import('globalTypes.mjs').EventTargetWithoutDispatch}
+     * @returns {EventTargetWithoutDispatch}
      */
     get fetchFileSizeEvents() {
         return {
@@ -44,7 +48,7 @@ export default class UrlDownloader {
     }
 
     /**
-     * @returns {import('globalTypes.mjs').EventTargetWithoutDispatch}
+     * @returns {EventTargetWithoutDispatch}
      */
     get downloadEvents() {
         return {
@@ -108,11 +112,14 @@ export default class UrlDownloader {
             this.#downloadEvents.dispatchEvent(new CustomEvent('downloaderror', { detail: { fileName: this.#fileName, status: response.status, statusText: response.statusText } }));
             throw new FetchError(response.status, response.statusText);
         }
-
+        
         const reader = new CountBlobFromResponseLengthProgress(response)
-        reader.progressEvents.addEventListener('progress', this.#onReaderProgress.bind(this))
+        const onReaderProgress = this.#onReaderProgress.bind(this);
+        reader.progressEvents.addEventListener('progress', onReaderProgress)
 
         this.#fetchedFile = await reader.toBlob()
+
+        reader.progressEvents.removeEventListener('progress', onReaderProgress)
 
         this.#downloadEvents.dispatchEvent(new CustomEvent('downloadfinished', { detail: { fileName: this.#fileName, blob: this.fetchedFile } }));
 
@@ -127,19 +134,27 @@ export default class UrlDownloader {
     }
 }
 
+/**
+ * Custom error class for fetch errors.
+ * @extends Error
+ */
 export class FetchError extends Error {
     /**
+     * The HTTP status code of the fetch error.
      * @type {number}
      */
     #status
+
     /**
+     * The status text of the fetch error.
      * @type {string}
      */
     #statusText
 
     /**
-     * @param {number} status
-     * @param {string} statusText
+     * Creates a new FetchError instance.
+     * @param {number} status - The HTTP status code of the fetch error.
+     * @param {string} statusText - The status text of the fetch error.
      */
     constructor(status, statusText) {
         super(`Fetch failed with status ${status} ${statusText}`);

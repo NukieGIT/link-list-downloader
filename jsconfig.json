@@ -1,12 +1,17 @@
 {
+    "exclude": [
+        "old/*"
+    ],
     "compilerOptions": {
         "module": "ESNext",
         "target": "ESNext",
         "checkJs": true,
         "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitAny": true,
         "baseUrl": ".",
         "paths": {
             "/*": ["*"]
         }
-    },
+    }
 }

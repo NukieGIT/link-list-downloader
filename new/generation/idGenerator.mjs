@@ -1,17 +1,17 @@
-import { DoublyLinkedList, Node } from '/new/dataStructures/doublyLinkedList.mjs'
+import { DoublyLinkedList } from '/new/dataStructures/doublyLinkedList.mjs'
 
 export default class IdGenerator {
     /**
      * @type {number}
      */
-    #currentId
+    #maxId
     /**
      * @type {DoublyLinkedList<number>}
      */
     #availableIds
 
     constructor() {
-        this.#currentId = 1;
+        this.#maxId = 1;
         this.#availableIds = new DoublyLinkedList();
     }
 
@@ -20,7 +20,7 @@ export default class IdGenerator {
      */
     generateId() {
         if (this.#availableIds.length === 0) {
-            return this.#currentId++;
+            return this.#maxId++;
         } else {
             return this.#availableIds.removeFirst().value;
         }
@@ -30,6 +30,15 @@ export default class IdGenerator {
      * @param {number} id
      */
     releaseId(id) {
-        this.#availableIds.insertLast(id);
+        if (id === this.#maxId) {
+            this.#maxId--;
+            while (this.#availableIds.removeValue(this.#maxId)) {
+                this.#maxId--;
+            }
+        } else {
+            this.#availableIds.insertLast(id);
+        }
     }
 }
+
+export const GlobalIdGeneratorInstance = new IdGenerator();

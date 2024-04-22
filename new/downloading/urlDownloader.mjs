@@ -1,11 +1,17 @@
+import { GlobalIdGeneratorInstance } from "../generation/idGenerator.mjs";
 import { retrieveFileNameFromUrl } from "../utils.mjs";
 import { CountBlobFromResponseLengthProgress } from "./blobFromResponse.mjs";
 
 /**
- * @import { EventTargetWithoutDispatch, FetchFileSizeEventTarget } from '/new/globalTypes'
+ * @import { EventTargetWithoutDispatch, FetchFileSizeEventTarget } from '../types/globalTypes'
  */
 
 export default class UrlDownloader {
+
+    /**
+     * @type {number}
+     */
+    #id
 
     /**
      * @type {string}
@@ -29,12 +35,16 @@ export default class UrlDownloader {
      */
     #fetchFileSizeEvents
     /**
-     * @type {FetchFileSizeEventTarget}
+     * @type {EventTarget}
      */
     #downloadEvents
 
     static get UNKNOWN_FILE_SIZE() {
         return -1
+    }
+
+    get id() {
+        return this.#id
     }
 
     /**
@@ -73,6 +83,8 @@ export default class UrlDownloader {
      * @param {string} url
      */
     constructor(url) {
+        this.#id = GlobalIdGeneratorInstance.generateId();
+        
         this.#url = url;
         this.#fileName = retrieveFileNameFromUrl(url);
 
@@ -124,6 +136,13 @@ export default class UrlDownloader {
         this.#downloadEvents.dispatchEvent(new CustomEvent('downloadfinished', { detail: { fileName: this.#fileName, blob: this.fetchedFile } }));
 
         return this.fetchedFile;
+    }
+
+    /**
+     * Closes the downloader and releases the ID.
+     */
+    close() {
+        GlobalIdGeneratorInstance.releaseId(this.#id);
     }
 
     /**

@@ -1,13 +1,11 @@
 // not yet warfgsawsRFG
 
-export declare type EventTargetWithoutDispatch = Omit<FetchFileSizeEventTarget, 'dispatchEvent'>;
-
+export type EventTargetWithoutDispatch = Omit<FetchFileSizeEventTarget, 'dispatchEvent'>;
 
 type FetchFileSizeEventMap = {
     "fetchfilesizestart": CustomEvent<{ fileName: string }>
     "fetchfilesizefinished": CustomEvent<{ fileName: string, fileSize: number }>
 }
-
 
 interface FetchFileSizeEventTarget extends EventTarget {
     addEventListener<K extends keyof FetchFileSizeEventMap>(

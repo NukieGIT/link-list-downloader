@@ -1,7 +1,7 @@
 import UrlDownloader from './urlDownloader.mjs'
 
 /**
- * @import { EventTargetWithoutDispatch } from '/new/globalTypes'
+ * @import { EventTargetWithoutDispatch } from '../types/globalTypes'
  */
 
 export default class DownloadManager {

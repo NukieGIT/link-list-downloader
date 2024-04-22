@@ -45,12 +45,11 @@ export default class DownloadManager {
         }
     }
 
-    get urlDownloaderFetchEvents() {
-        return this.#urlDownloaders.map(urlDownloader => urlDownloader.fetchFileSizeEvents)
-    }
-
-    get urlDownloaderDownloadEvents() {
-        return this.#urlDownloaders.map(urlDownloader => urlDownloader.downloadEvents)
+    /**
+     * @returns {readonly UrlDownloader[]}
+     */
+    get urlDownloaders() {
+        return this.#urlDownloaders
     }
 
     /**

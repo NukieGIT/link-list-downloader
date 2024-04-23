@@ -167,6 +167,14 @@ export class FetchError extends Error {
      */
     #statusText
 
+    get status() {
+        return this.#status;
+    }
+
+    get statusText() {
+        return this.#statusText;
+    }
+
     /**
      * Creates a new FetchError instance.
      * @param {number} status - The HTTP status code of the fetch error.

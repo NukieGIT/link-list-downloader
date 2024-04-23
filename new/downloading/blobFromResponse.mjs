@@ -1,6 +1,10 @@
+import GenericEvents from "../events/events.mjs";
+
 /**
- * Represents a class that converts a response into a Blob.
+ * @import { CountBlobFromResponseLengthProgressEventMap } from '/new/events/downloadingEvents'
+ * @import { GenericEventListener } from '/new/events/events'
  */
+
 /**
  * Represents a class that converts a response into a Blob.
  */
@@ -30,6 +34,10 @@ export class BlobFromResponse {
      */
     async toBlob() {
         const reader = this.response.body.getReader();
+
+        /**
+         * @type {Uint8Array[]}
+         */
         const chunks = [];
         let result;
 
@@ -90,14 +98,17 @@ export class CountBlobFromResponseLength extends BlobFromResponse {
  */
 export class CountBlobFromResponseLengthProgress extends CountBlobFromResponseLength {
 
+    /**
+     * @type {GenericEvents<CountBlobFromResponseLengthProgressEventMap>}
+     */
     #progressEvents
 
     /**
      * Gets the progress events.
-     * @returns {EventTarget} The progress events.
+     * @returns {GenericEventListener<CountBlobFromResponseLengthProgressEventMap>}
      */
     get progressEvents() {
-        return this.#progressEvents;
+        return this.#progressEvents.genericEventsListener;
     }
 
     /**
@@ -106,7 +117,7 @@ export class CountBlobFromResponseLengthProgress extends CountBlobFromResponseLe
      */
     constructor(response) {
         super(response);
-        this.#progressEvents = new EventTarget();
+        this.#progressEvents = new GenericEvents();
     }
 
     /**
@@ -115,6 +126,6 @@ export class CountBlobFromResponseLengthProgress extends CountBlobFromResponseLe
      */
     _processChunk(chunk) {
         super._processChunk(chunk);
-        this.#progressEvents.dispatchEvent(new CustomEvent('progress', { detail: { length: this.length } }));
+        this.#progressEvents.dispatchEvent("progress", this.length);
     }
 }

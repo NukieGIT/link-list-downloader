@@ -1,7 +1,7 @@
 import UrlDownloader from './urlDownloader.mjs'
 
 /**
- * @import { EventTargetWithoutDispatch } from '../types/globalTypes'
+ * 
  */
 
 export default class DownloadManager {
@@ -16,36 +16,6 @@ export default class DownloadManager {
     #urlDownloaders
 
     /**
-     * @type {EventTarget}
-     */
-    #downloadEvents
-
-    /**
-     * @type {EventTarget}
-     */
-    #fetchFileSizeEvents
-
-    /**
-     * @returns {EventTargetWithoutDispatch}
-     */
-    get downloadEvents() {
-        return {
-            addEventListener: this.#downloadEvents.addEventListener.bind(this.#downloadEvents),
-            removeEventListener: this.#downloadEvents.removeEventListener.bind(this.#downloadEvents)
-        }
-    }
-
-    /**
-     * @returns {EventTargetWithoutDispatch}
-     */
-    get fetchFileSizeEvents() {
-        return {
-            addEventListener: this.#fetchFileSizeEvents.addEventListener.bind(this.#fetchFileSizeEvents),
-            removeEventListener: this.#fetchFileSizeEvents.removeEventListener.bind(this.#fetchFileSizeEvents)
-        }
-    }
-
-    /**
      * @returns {readonly UrlDownloader[]}
      */
     get urlDownloaders() {
@@ -58,7 +28,6 @@ export default class DownloadManager {
     constructor(urls) {
         this.#urls = urls
         this.#urlDownloaders = []
-        this.#downloadEvents = new EventTarget()
 
         this.#createUrlDownloaders()
     }

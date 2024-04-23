@@ -1,11 +1,13 @@
 /**
- * @import { EventTypes, EventListener, EventDetail, EventMap } from './Events'
+ * @import { EventTypes, EventListener, EventDetail, EventMap } from './events'
  */
+
+// TODO: Return `removeEventListener` reference from `addEventListener`
 
 /**
  * @template {EventMap} KVMap
  */
-export class GenericEvents {
+export default class GenericEvents {
     /**
      * @type {EventTarget}
      */

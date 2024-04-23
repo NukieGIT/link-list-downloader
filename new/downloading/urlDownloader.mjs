@@ -1,9 +1,11 @@
+import GenericEvents from "../events/events.mjs";
 import { GlobalIdGeneratorInstance } from "../generation/idGenerator.mjs";
 import { retrieveFileNameFromUrl } from "../utils.mjs";
 import { CountBlobFromResponseLengthProgress } from "./blobFromResponse.mjs";
 
 /**
- * @import { EventTargetWithoutDispatch, FetchFileSizeEventTarget } from '../types/globalTypes'
+ * @import { FetchFileSizeEventMap, DownloadEventTypesMap } from '/new/events/downloadingEvents'
+ * @import { GenericEventListener } from '/new/events/events'
  */
 
 export default class UrlDownloader {
@@ -31,11 +33,11 @@ export default class UrlDownloader {
     #fetchedFile
 
     /**
-     * @type {FetchFileSizeEventTarget}
+     * @type {GenericEvents<FetchFileSizeEventMap>}
      */
     #fetchFileSizeEvents
     /**
-     * @type {EventTarget}
+     * @type {GenericEvents<DownloadEventTypesMap>}
      */
     #downloadEvents
 
@@ -48,23 +50,18 @@ export default class UrlDownloader {
     }
 
     /**
-     * @returns {EventTargetWithoutDispatch}
+     * @returns {GenericEventListener<FetchFileSizeEventMap>}
      */
     get fetchFileSizeEvents() {
-        return {
-            addEventListener: this.#fetchFileSizeEvents.addEventListener.bind(this.#fetchFileSizeEvents),
-            removeEventListener: this.#fetchFileSizeEvents.removeEventListener.bind(this.#fetchFileSizeEvents)
-        }
+        return this.#fetchFileSizeEvents.genericEventsListener
     }
 
+
     /**
-     * @returns {EventTargetWithoutDispatch}
+     * @returns {GenericEventListener<DownloadEventTypesMap>}
      */
     get downloadEvents() {
-        return {
-            addEventListener: this.#downloadEvents.addEventListener.bind(this.#downloadEvents),
-            removeEventListener: this.#downloadEvents.removeEventListener.bind(this.#downloadEvents)
-        }
+        return this.#downloadEvents.genericEventsListener
     }
 
     get fileName() {
@@ -90,8 +87,8 @@ export default class UrlDownloader {
 
         this.#fileSize = UrlDownloader.UNKNOWN_FILE_SIZE;
 
-        this.#fetchFileSizeEvents = new EventTarget();
-        this.#downloadEvents = new EventTarget();
+        this.#fetchFileSizeEvents = new GenericEvents();
+        this.#downloadEvents = new GenericEvents();
     }
 
     /**
@@ -100,12 +97,12 @@ export default class UrlDownloader {
      * @returns {Promise<number>}
      */
     async fetchFileSize() {
-        this.#fetchFileSizeEvents.dispatchEvent(new CustomEvent('fetchfilesizestart', { detail: { fileName: this.#fileName } }));
+        this.#fetchFileSizeEvents.dispatchEvent("fetchfilesizestarted", { id: this.#id });
 
         const response = await fetch(this.#url, { method: 'HEAD' });
         this.#fileSize = parseInt(response.headers.get('Content-Length')) ?? UrlDownloader.UNKNOWN_FILE_SIZE;
 
-        this.#fetchFileSizeEvents.dispatchEvent(new CustomEvent('fetchfilesizefinished', { detail: { fileName: this.#fileName, fileSize: this.#fileSize } }));
+        this.#fetchFileSizeEvents.dispatchEvent("fetchfilesizefinished", { id: this.#id });
 
         return this.fileSize;
     }
@@ -116,12 +113,12 @@ export default class UrlDownloader {
      * @returns {Promise<Blob>}
      */
     async download() {
-        this.#downloadEvents.dispatchEvent(new CustomEvent('downloadstart', { detail: { fileName: this.#fileName } }));
+        this.#downloadEvents.dispatchEvent("downloadstarted", { id: this.#id });
         
         const response = await fetch(this.#url)
 
         if (!response.ok) {
-            this.#downloadEvents.dispatchEvent(new CustomEvent('downloaderror', { detail: { fileName: this.#fileName, status: response.status, statusText: response.statusText } }));
+            this.#downloadEvents.dispatchEvent("downloaderror", { id: this.#id, status: response.status, statusText: response.statusText});
             throw new FetchError(response.status, response.statusText);
         }
         
@@ -133,7 +130,7 @@ export default class UrlDownloader {
 
         reader.progressEvents.removeEventListener('progress', onReaderProgress)
 
-        this.#downloadEvents.dispatchEvent(new CustomEvent('downloadfinished', { detail: { fileName: this.#fileName, blob: this.fetchedFile } }));
+        this.#downloadEvents.dispatchEvent("downloadfinished", { id: this.#id });
 
         return this.fetchedFile;
     }
@@ -149,7 +146,7 @@ export default class UrlDownloader {
      * @param {CustomEvent} event
      */
     #onReaderProgress(event) {
-        this.#downloadEvents.dispatchEvent(new CustomEvent('downloadprogress', { detail: { fileName: this.#fileName, length: event.detail.length } }));
+        this.#downloadEvents.dispatchEvent("downloadprogress", { id: this.#id, loadedBytes: event.detail.progress });
     }
 }
 

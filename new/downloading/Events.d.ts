@@ -1,5 +1,10 @@
-type DownloadEventTypesMap = {
-    "downloadstarted": { id: number }
+export type EventMap = Record<string, any>;
+
+export type EventTypes<T extends EventMap> = Extract<keyof T, string>;
+
+export type EventDetail<T extends EventMap, K extends EventTypes<T>> = T[K];
+
+export type EventListener<T extends EventMap, K extends EventTypes<T>> = (ev: CustomEvent<EventDetail<T, K>>) => void;
     "downloaderror": { id: number, status: string, statusText: string }
     "downloadprogress": { id: number, loaded: number }
     "downloadfinished": { id: number }

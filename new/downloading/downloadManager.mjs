@@ -15,11 +15,8 @@ export default class DownloadManager {
      */
     #urlDownloaders
 
-    /**
-     * @returns {readonly UrlDownloader[]}
-     */
     get urlDownloaders() {
-        return this.#urlDownloaders
+        return this.#urlDownloaders.map(ud => ud.limitedUrlDownloader)
     }
 
     /**

@@ -45,6 +45,13 @@ export default class UrlDownloader {
         return -1
     }
 
+    /**
+     * @returns {Omit<UrlDownloader, 'fetchFileSize' | 'download' | 'close'>}
+     */
+    get limitedUrlDownloader() {
+        return this
+    }
+
     get id() {
         return this.#id
     }

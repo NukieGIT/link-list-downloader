@@ -6,6 +6,7 @@ import { CountBlobFromResponseLengthProgress } from "./blobFromResponse.mjs";
 /**
  * @import { FetchFileSizeEventMap, DownloadEventTypesMap } from '/new/events/downloadingEvents'
  * @import { GenericEventListener } from '/new/events/events'
+ * @import { LimitedUrlDownloader } from './urlDownloader'
  */
 
 export default class UrlDownloader {
@@ -46,7 +47,7 @@ export default class UrlDownloader {
     }
 
     /**
-     * @returns {Omit<UrlDownloader, 'fetchFileSize' | 'download' | 'close'>}
+     * @returns {LimitedUrlDownloader}
      */
     get limitedUrlDownloader() {
         return this
@@ -62,7 +63,6 @@ export default class UrlDownloader {
     get fetchFileSizeEvents() {
         return this.#fetchFileSizeEvents.genericEventsListener
     }
-
 
     /**
      * @returns {GenericEventListener<DownloadEventTypesMap>}
@@ -130,12 +130,11 @@ export default class UrlDownloader {
         }
         
         const reader = new CountBlobFromResponseLengthProgress(response)
-        const onReaderProgress = this.#onReaderProgress.bind(this);
-        reader.progressEvents.addEventListener('progress', onReaderProgress)
+        reader.progressEvents.addEventListener('progress', e => {
+            this.#downloadEvents.dispatchEvent("downloadprogress", { id: this.#id, loadedBytes: e.detail });
+        })
 
         this.#fetchedFile = await reader.toBlob()
-
-        reader.progressEvents.removeEventListener('progress', onReaderProgress)
 
         this.#downloadEvents.dispatchEvent("downloadfinished", { id: this.#id });
 
@@ -147,13 +146,6 @@ export default class UrlDownloader {
      */
     close() {
         GlobalIdGeneratorInstance.releaseId(this.#id);
-    }
-
-    /**
-     * @param {CustomEvent} event
-     */
-    #onReaderProgress(event) {
-        this.#downloadEvents.dispatchEvent("downloadprogress", { id: this.#id, loadedBytes: event.detail.progress });
     }
 }
 

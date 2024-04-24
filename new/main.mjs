@@ -3,7 +3,28 @@ import { ProgressBarComponent } from "/new/components/progressBarComponent.mjs"
 import { convertDataUnit, getDataUnit } from "/new/utils.mjs"
 import IdGenerator from "/new/generation/idGenerator.mjs"
 import { DoublyLinkedList } from "/new/dataStructures/doublyLinkedList.mjs";
+import DownloadManager from "./downloading/downloadManager.mjs";
+import DownloadVisualizer from "./downloading/downloadVisualizer.mjs";
 
+const urls = [
+    "https://link.testfile.org/500MB",
+    "https://link.testfile.org/500MB",
+    "https://link.testfile.org/500MB",
+    "https://link.testfile.org/500MB",
+    "https://link.testfile.org/500MB",
+    "https://link.testfile.org/500MB",
+    "https://link.testfile.org/500MB",
+    "https://link.testfile.org/500MB",
+    "https://link.testfile.org/500MB",
+    "https://link.testfile.org/500MB",
+    "https://link.testfile.org/500MB",
+]
+
+const downloadManager = new DownloadManager(urls)
+// const downloadVisualizer = new DownloadVisualizer(downloadManager)
+
+// await downloadManager.fetchTotalFileSize()
+// await downloadManager.downloadAll()
 
 // progressBar.unitConverter = (/** @type {number} */ value, /** @type {number} */ max) => {
 //     const maxDataUnit = getDataUnit(max)

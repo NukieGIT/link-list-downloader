@@ -1,7 +1,7 @@
 import UrlDownloader from './urlDownloader.mjs'
 
 /**
- * 
+ * @import { LimitedUrlDownloader } from './urlDownloader'
  */
 
 export default class DownloadManager {
@@ -15,6 +15,9 @@ export default class DownloadManager {
      */
     #urlDownloaders
 
+    /**
+     * @type {readonly LimitedUrlDownloader[]}
+     */
     get urlDownloaders() {
         return this.#urlDownloaders.map(ud => ud.limitedUrlDownloader)
     }
@@ -42,5 +45,14 @@ export default class DownloadManager {
 
     async fetchTotalFileSize() {
         const results = await Promise.allSettled(this.#urlDownloaders.map(urlDownloader => urlDownloader.fetchFileSize()))
+
+        let totalFileSize = 0
+        for (const result of results) {
+            if (result.status === "fulfilled") {
+                totalFileSize += result.value
+            }
+        }
+
+        return totalFileSize
     }
 }

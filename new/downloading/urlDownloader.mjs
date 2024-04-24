@@ -107,6 +107,12 @@ export default class UrlDownloader {
         this.#fetchFileSizeEvents.dispatchEvent("fetchfilesizestarted", { id: this.#id });
 
         const response = await fetch(this.#url, { method: 'HEAD' });
+
+        if (!response.ok) {
+            // TODO: dispatch error event
+            throw new FetchError(response.status, response.statusText);
+        }
+
         this.#fileSize = parseInt(response.headers.get('Content-Length')) ?? UrlDownloader.UNKNOWN_FILE_SIZE;
 
         this.#fetchFileSizeEvents.dispatchEvent("fetchfilesizefinished", { id: this.#id });

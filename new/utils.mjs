@@ -57,7 +57,8 @@ export function convertDataUnit(data, from, to) {
  */
 export function getDataUnit(data) {
     if (data === 0) return "Bytes"
-
+    
+    data = Math.abs(data)
     const index = Math.floor(Math.log(data) / Math.log(1024))
 
     return DATA_UNITS[index]

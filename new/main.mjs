@@ -6,6 +6,9 @@ import { DoublyLinkedList } from "/new/dataStructures/doublyLinkedList.mjs";
 import DownloadManager from "./downloading/downloadManager.mjs";
 import DownloadVisualizer from "./downloading/downloadVisualizer.mjs";
 
+const totalProgressContainer = /** @type {HTMLElement} */ (document.querySelector("#total-progress-container"))
+const downloadsProgressContainer = /** @type {HTMLElement} */ (document.querySelector("#downloads-progress-container"))
+
 const urls = [
     "https://link.testfile.org/500MB",
     "https://link.testfile.org/500MB",
@@ -21,9 +24,9 @@ const urls = [
 ]
 
 const downloadManager = new DownloadManager(urls)
-// const downloadVisualizer = new DownloadVisualizer(downloadManager)
+const downloadVisualizer = new DownloadVisualizer(downloadManager, totalProgressContainer, downloadsProgressContainer)
 
-// await downloadManager.fetchTotalFileSize()
+await downloadManager.fetchTotalFileSize()
 // await downloadManager.downloadAll()
 
 // progressBar.unitConverter = (/** @type {number} */ value, /** @type {number} */ max) => {

@@ -12,4 +12,19 @@ export type FetchFileSizeEventMap = {
 
 export type CountBlobFromResponseLengthProgressEventMap = {
     "progress": number
+    "size": number
+}
+
+export type FetchTotalFileSizeEventMap = {
+    "fetchstarted": null
+    "progress": { size: number}
+    "fetchfinished": null
+}
+
+export type DownloadedFileSizeEventMap = {
+    "progress": { size: number }
+}
+
+export type DownloadedFilesCountEventMap = {
+    "progress": { count: number }
 }

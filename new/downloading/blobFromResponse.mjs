@@ -126,6 +126,7 @@ export class CountBlobFromResponseLengthProgress extends CountBlobFromResponseLe
      */
     _processChunk(chunk) {
         super._processChunk(chunk);
-        this.#progressEvents.dispatchEvent("progress", this.length);
+        this.#progressEvents.dispatchEvent("size", this.length);
+        this.#progressEvents.dispatchEvent("progress", chunk.length)
     }
 }

@@ -2,8 +2,6 @@
  * @import { EventTypes, EventListener, EventDetail, EventMap } from './events'
  */
 
-// TODO: Return `removeEventListener` reference from `addEventListener`
-
 /**
  * @template {EventMap} KVMap
  */
@@ -28,9 +26,13 @@ export default class GenericEvents {
      * @template {EventTypes<KVMap>} T
      * @param {T} type
      * @param {EventListener<KVMap, T>} listener
+     * 
+     * @returns {() => void} Remove event listener function.
      */
     addEventListener(type, listener) {
         this.#eventTarget.addEventListener(type, listener)
+
+        return () => this.removeEventListener(type, listener)
     }
 
     /**

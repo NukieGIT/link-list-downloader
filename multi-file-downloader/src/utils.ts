@@ -5,9 +5,9 @@ const validLinkFileTypes = [
 /**
  * Checks if the file has a valid file type.
  * 
- * @param {File} file - The file to be checked.
- * @param {string[]} validTypes - An array of valid file types.
- * @returns {boolean} Returns true if the file has a valid file type, otherwise false.
+ * @param file - The file to be checked.
+ * @param validTypes - An array of valid file types.
+ * @returns Returns true if the file has a valid file type, otherwise false.
  */
 export function isValidFileType(file: File, validTypes: string[] = validLinkFileTypes): boolean {
     return validTypes.includes(file.type)
@@ -16,8 +16,8 @@ export function isValidFileType(file: File, validTypes: string[] = validLinkFile
 /**
  * Checks if a given URL is valid.
  *
- * @param {string} url - The URL to be checked.
- * @returns {boolean} Returns true if the URL is valid, false otherwise.
+ * @param url - The URL to be checked.
+ * @returns Returns true if the URL is valid, false otherwise.
  */
 export function isValidUrl(url: string): boolean {
     try {
@@ -28,15 +28,15 @@ export function isValidUrl(url: string): boolean {
     }
 }
 
-export const DATA_UNITS = /** @type {const} */ (['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']);
+export const DATA_UNITS = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] as const;
 
 /**
  * Formats the given data size to a human-readable format.
  * 
- * @param {number} data - The data size to be formatted.
- * @param {typeof DATA_UNITS[number]} from - The data unit of the given data size.
- * @param {typeof DATA_UNITS[number]} to - The data unit to which the data size should be converted.
- * @returns {number} The formatted data size.
+ * @param data - The data size to be formatted.
+ * @param from - The data unit of the given data size.
+ * @param to - The data unit to which the data size should be converted.
+ * @returns The formatted data size.
  */
 export function convertDataUnit(data: number, from: typeof DATA_UNITS[number], to: typeof DATA_UNITS[number]): number {
     const fromIndex = DATA_UNITS.indexOf(from)
@@ -52,8 +52,8 @@ export function convertDataUnit(data: number, from: typeof DATA_UNITS[number], t
 /**
  * Retrieves the data unit for the given data size.
  * 
- * @param {number} data - The data size to be formatted.
- * @returns {typeof DATA_UNITS[number]} The formatted data with unit.
+ * @param data - The data size to be formatted.
+ * @returns The formatted data with unit.
  */
 export function getDataUnit(data: number): typeof DATA_UNITS[number] {
     if (data === 0) return "Bytes"
@@ -68,9 +68,9 @@ export function getDataUnit(data: number): typeof DATA_UNITS[number] {
  * Retrieves the file name from a given URL.
  * If no file name is found, it returns the default name.
  *
- * @param {string} url - The URL from which to retrieve the file name.
- * @param {string} defaultName - The default name to use if no file name is found. Default is 'index.html'.
- * @returns {string} The retrieved file name.
+ * @param url - The URL from which to retrieve the file name.
+ * @param defaultName - The default name to use if no file name is found. Default is 'index.html'.
+ * @returns The retrieved file name.
  */
 export function retrieveFileNameFromUrl(url: string, defaultName: string = sanitizeFileName(url)): string {
     const fileName = url.split('#')?.shift()?.split('?')?.shift()?.split('/')?.pop() ?? '';
@@ -82,8 +82,8 @@ export function retrieveFileNameFromUrl(url: string, defaultName: string = sanit
 
 /**
  * Sanitizes the given file name by replacing invalid characters and checking for reserved names.
- * @param {string} fileName - The original file name.
- * @returns {string} The sanitized file name.
+ * @param fileName - The original file name.
+ * @returns The sanitized file name.
  */
 export function sanitizeFileName(fileName: string): string {
     const invalidCharactersRegex = /[<>:"/\\|?*\x00-\x1F]/g;

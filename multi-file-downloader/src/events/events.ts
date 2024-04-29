@@ -9,7 +9,21 @@ export interface IEventListenerHandler<T> {
 export type EventListenerOrEventListenerHandler<T> = EventListenerHandler<T> | IEventListenerHandler<T>;
 
 export interface IEventListener<T extends EventMap> {
+    /**
+     * Adds an event listener of the specified type.
+     * Returns a function that can be called to remove the event listener.
+     *
+     * @param type - The type of the event.
+     * @param listener - The event listener.
+     * @returns A function that removes the event listener when called.
+     */
     addEventListener<K extends keyof T>(type: K, listener: EventListenerOrEventListenerHandler<T[K]>): () => void;
+    /**
+     * Removes an event listener.
+     * 
+     * @param type - The type of the event.
+     * @param listener - The event listener.
+     */
     removeEventListener<K extends keyof T>(type: K, listener: EventListenerOrEventListenerHandler<T[K]>): void;
 }
 
@@ -25,14 +39,6 @@ export class TypedEventTarget<T extends EventMap> implements IEventListener<T> {
         return this as IEventListener<T>;
     }
 
-    /**
-     * Adds an event listener of the specified type.
-     * Returns a function that can be called to remove the event listener.
-     *
-     * @param type - The type of the event.
-     * @param listener - The event listener.
-     * @returns A function that removes the event listener when called.
-     */
     public addEventListener<K extends keyof T>(
         type: K,
         listener: EventListenerOrEventListenerHandler<T[K]>
@@ -42,12 +48,6 @@ export class TypedEventTarget<T extends EventMap> implements IEventListener<T> {
         return () => this.removeEventListener(type, listener);
     }
 
-    /**
-     * Removes an event listener.
-     * 
-     * @param type - The type of the event.
-     * @param listener - The event listener.
-     */
     public removeEventListener<K extends keyof T>(
         type: K,
         listener: EventListenerOrEventListenerHandler<T[K]>

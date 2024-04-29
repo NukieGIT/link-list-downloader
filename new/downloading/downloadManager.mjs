@@ -1,7 +1,9 @@
+import GenericEvents from '../events/events.mjs'
 import UrlDownloader from './urlDownloader.mjs'
 
 /**
- * 
+ * @import { LimitedUrlDownloader } from './urlDownloader'
+ * @import { DownloadedFilesCountEventMap, DownloadedFileSizeEventMap, FetchTotalFileSizeEventMap } from '/new/events/downloadingEvents'
  */
 
 export default class DownloadManager {
@@ -13,10 +15,67 @@ export default class DownloadManager {
     /**
      * @type {UrlDownloader[]}
      */
-    #urlDownloaders
+    #urlDownloaders = []
 
+    /**
+     * @type {number}
+     */
+    #totalFileSize = 0
+
+    /**
+     * @type {GenericEvents<FetchTotalFileSizeEventMap>}
+     */
+    #fetchTotalFileSizeEvents = new GenericEvents()
+
+    /**
+     * @type {number}
+     */
+    #downloadedFileSize = 0
+
+    /**
+     * @type {GenericEvents<DownloadedFileSizeEventMap>}
+     */
+    #downloadedFileSizeEvents = new GenericEvents()
+
+    /**
+     * @type {number}
+     */
+    #downloadedFilesCount = 0
+
+    /**
+     * @type {GenericEvents<DownloadedFilesCountEventMap>}
+     */
+    #downloadedFilesCountEvents = new GenericEvents()
+
+    /**
+     * @type {readonly LimitedUrlDownloader[]}
+     */
     get urlDownloaders() {
         return this.#urlDownloaders.map(ud => ud.limitedUrlDownloader)
+    }
+
+    get totalFileSize() {
+        return this.#totalFileSize
+    }
+
+    get downloadedFileSize() {
+        return this.#downloadedFileSize
+    }
+
+    get downloadedFilesCount() {
+        return this.#downloadedFilesCount
+    }
+
+    get fetchTotalFileSizeEvents() {
+        return this.#fetchTotalFileSizeEvents.genericEventsListener
+    }
+
+    get downloadedFileSizeEvents() {
+        return this.#downloadedFileSizeEvents.genericEventsListener
+    }
+
+    get downloadedFilesCountEvents() {
+        return this.#downloadedFilesCountEvents.genericEventsListener
     }
 
     /**
@@ -24,7 +83,6 @@ export default class DownloadManager {
      */
     constructor(urls) {
         this.#urls = urls
-        this.#urlDownloaders = []
 
         this.#createUrlDownloaders()
     }
@@ -37,10 +95,38 @@ export default class DownloadManager {
     }
 
     async downloadAll() {
-        const results = await Promise.allSettled(this.#urlDownloaders.map(urlDownloader => urlDownloader.download()))
+        await Promise.allSettled(this.#urlDownloaders.map(async urlDownloader => {
+            const unsubscribeDownloadProgress = urlDownloader.downloadEvents.addEventListener("progress", e => {
+                this.#downloadedFileSize += e.detail.loadedBytes
+                this.#downloadedFileSizeEvents.dispatchEvent("progress", { size: e.detail.loadedBytes })
+            })
+
+            const blob = await urlDownloader.download()
+            unsubscribeDownloadProgress()
+
+            this.#downloadedFilesCount++
+            this.#downloadedFilesCountEvents.dispatchEvent("progress", { count: this.#downloadedFilesCount })
+
+            return blob
+        }))
+
+        return this.#downloadedFileSize
     }
 
     async fetchTotalFileSize() {
-        const results = await Promise.allSettled(this.#urlDownloaders.map(urlDownloader => urlDownloader.fetchFileSize()))
+        this.#fetchTotalFileSizeEvents.dispatchEvent("start", null)
+        
+        await Promise.allSettled(this.#urlDownloaders.map(async urlDownloader => {
+            const fileSize = await urlDownloader.fetchFileSize()
+            this.#fetchTotalFileSizeEvents.dispatchEvent("progress", { size: fileSize })
+
+            this.#totalFileSize += fileSize
+
+            return fileSize
+        }))
+
+        this.#fetchTotalFileSizeEvents.dispatchEvent("finish", null)
+
+        return this.#totalFileSize
     }
 }

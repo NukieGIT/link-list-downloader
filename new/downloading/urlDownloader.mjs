@@ -6,6 +6,7 @@ import { CountBlobFromResponseLengthProgress } from "./blobFromResponse.mjs";
 /**
  * @import { FetchFileSizeEventMap, DownloadEventTypesMap } from '/new/events/downloadingEvents'
  * @import { GenericEventListener } from '/new/events/events'
+ * @import { LimitedUrlDownloader } from './urlDownloader'
  */
 
 export default class UrlDownloader {
@@ -33,6 +34,11 @@ export default class UrlDownloader {
     #fetchedFile
 
     /**
+     * @type {number}
+     */
+    #downloadedFileSize = 0
+
+    /**
      * @type {GenericEvents<FetchFileSizeEventMap>}
      */
     #fetchFileSizeEvents
@@ -46,7 +52,7 @@ export default class UrlDownloader {
     }
 
     /**
-     * @returns {Omit<UrlDownloader, 'fetchFileSize' | 'download' | 'close'>}
+     * @returns {LimitedUrlDownloader}
      */
     get limitedUrlDownloader() {
         return this
@@ -62,7 +68,6 @@ export default class UrlDownloader {
     get fetchFileSizeEvents() {
         return this.#fetchFileSizeEvents.genericEventsListener
     }
-
 
     /**
      * @returns {GenericEventListener<DownloadEventTypesMap>}
@@ -83,6 +88,10 @@ export default class UrlDownloader {
         return this.#fetchedFile;
     }
 
+    get downloadedFileSize() {
+        return this.#downloadedFileSize
+    }
+
     /**
      * @param {string} url
      */
@@ -90,6 +99,8 @@ export default class UrlDownloader {
         this.#id = GlobalIdGeneratorInstance.generateId();
         
         this.#url = url;
+
+        // TODO: retrieve file name from headers
         this.#fileName = retrieveFileNameFromUrl(url);
 
         this.#fileSize = UrlDownloader.UNKNOWN_FILE_SIZE;
@@ -102,14 +113,21 @@ export default class UrlDownloader {
      * Fetches the file size from the URL and returns it.
      * 
      * @returns {Promise<number>}
+     * @throws {FetchError} If the fetch gets a bad response.
      */
     async fetchFileSize() {
-        this.#fetchFileSizeEvents.dispatchEvent("fetchfilesizestarted", { id: this.#id });
+        this.#fetchFileSizeEvents.dispatchEvent("start", { id: this.#id });
 
         const response = await fetch(this.#url, { method: 'HEAD' });
+
+        if (!response.ok) {
+            // TODO: dispatch error event
+            throw new FetchError(response.status, response.statusText);
+        }
+
         this.#fileSize = parseInt(response.headers.get('Content-Length')) ?? UrlDownloader.UNKNOWN_FILE_SIZE;
 
-        this.#fetchFileSizeEvents.dispatchEvent("fetchfilesizefinished", { id: this.#id });
+        this.#fetchFileSizeEvents.dispatchEvent("finish", { id: this.#id });
 
         return this.fileSize;
     }
@@ -118,26 +136,29 @@ export default class UrlDownloader {
      * Downloads the file from the URL and returns a Blob.
      * 
      * @returns {Promise<Blob>}
+     * @throws {FetchError} If the fetch gets a bad response.
      */
     async download() {
-        this.#downloadEvents.dispatchEvent("downloadstarted", { id: this.#id });
+        this.#downloadEvents.dispatchEvent("start", { id: this.#id });
         
         const response = await fetch(this.#url)
 
         if (!response.ok) {
-            this.#downloadEvents.dispatchEvent("downloaderror", { id: this.#id, status: response.status, statusText: response.statusText});
+            this.#downloadEvents.dispatchEvent("error", { id: this.#id, status: response.status, statusText: response.statusText});
             throw new FetchError(response.status, response.statusText);
         }
         
         const reader = new CountBlobFromResponseLengthProgress(response)
-        const onReaderProgress = this.#onReaderProgress.bind(this);
-        reader.progressEvents.addEventListener('progress', onReaderProgress)
-
+        const unsubscribeReaderProgress = reader.progressEvents.addEventListener('progress', e => {
+            this.#downloadedFileSize = e.detail.totalProgress;
+            this.#downloadEvents.dispatchEvent("progress", { id: this.#id, loadedBytes: e.detail.progress });
+        })
+        
         this.#fetchedFile = await reader.toBlob()
 
-        reader.progressEvents.removeEventListener('progress', onReaderProgress)
+        unsubscribeReaderProgress()
 
-        this.#downloadEvents.dispatchEvent("downloadfinished", { id: this.#id });
+        this.#downloadEvents.dispatchEvent("finish", { id: this.#id });
 
         return this.fetchedFile;
     }
@@ -147,13 +168,6 @@ export default class UrlDownloader {
      */
     close() {
         GlobalIdGeneratorInstance.releaseId(this.#id);
-    }
-
-    /**
-     * @param {CustomEvent} event
-     */
-    #onReaderProgress(event) {
-        this.#downloadEvents.dispatchEvent("downloadprogress", { id: this.#id, loadedBytes: event.detail.progress });
     }
 }
 

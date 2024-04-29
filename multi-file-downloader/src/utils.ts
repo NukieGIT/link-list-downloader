@@ -9,7 +9,7 @@ const validLinkFileTypes = [
  * @param {string[]} validTypes - An array of valid file types.
  * @returns {boolean} Returns true if the file has a valid file type, otherwise false.
  */
-export function isValidFileType(file, validTypes = validLinkFileTypes) {
+export function isValidFileType(file: File, validTypes: string[] = validLinkFileTypes): boolean {
     return validTypes.includes(file.type)
 }
 
@@ -19,7 +19,7 @@ export function isValidFileType(file, validTypes = validLinkFileTypes) {
  * @param {string} url - The URL to be checked.
  * @returns {boolean} Returns true if the URL is valid, false otherwise.
  */
-export function isValidUrl(url) {
+export function isValidUrl(url: string): boolean {
     try {
         new URL(url)
         return true
@@ -38,7 +38,7 @@ export const DATA_UNITS = /** @type {const} */ (['Bytes', 'KB', 'MB', 'GB', 'TB'
  * @param {typeof DATA_UNITS[number]} to - The data unit to which the data size should be converted.
  * @returns {number} The formatted data size.
  */
-export function convertDataUnit(data, from, to) {
+export function convertDataUnit(data: number, from: typeof DATA_UNITS[number], to: typeof DATA_UNITS[number]): number {
     const fromIndex = DATA_UNITS.indexOf(from)
     const toIndex = DATA_UNITS.indexOf(to)
 
@@ -55,7 +55,7 @@ export function convertDataUnit(data, from, to) {
  * @param {number} data - The data size to be formatted.
  * @returns {typeof DATA_UNITS[number]} The formatted data with unit.
  */
-export function getDataUnit(data) {
+export function getDataUnit(data: number): typeof DATA_UNITS[number] {
     if (data === 0) return "Bytes"
     
     data = Math.abs(data)
@@ -72,12 +72,12 @@ export function getDataUnit(data) {
  * @param {string} defaultName - The default name to use if no file name is found. Default is 'index.html'.
  * @returns {string} The retrieved file name.
  */
-export function retrieveFileNameFromUrl(url, defaultName = sanitizeFileName(url)) {
-    const fileName = url.split('#').shift().split('?').shift().split('/').pop()
+export function retrieveFileNameFromUrl(url: string, defaultName: string = sanitizeFileName(url)): string {
+    const fileName = url.split('#')?.shift()?.split('?')?.shift()?.split('/')?.pop() ?? '';
 
     // check for empty name, such as only spaces or tabs
-    const validFileName = !/\s+/.test(fileName) ? defaultName : sanitizeFileName(fileName)
-    return validFileName
+    const validFileName = /\S/.test(fileName) ? sanitizeFileName(fileName) : defaultName;
+    return validFileName;
 }
 
 /**
@@ -85,7 +85,7 @@ export function retrieveFileNameFromUrl(url, defaultName = sanitizeFileName(url)
  * @param {string} fileName - The original file name.
  * @returns {string} The sanitized file name.
  */
-export function sanitizeFileName(fileName) {
+export function sanitizeFileName(fileName: string): string {
     const invalidCharactersRegex = /[<>:"/\\|?*\x00-\x1F]/g;
     const sanitizedFileName = fileName.replace(invalidCharactersRegex, '_');
 

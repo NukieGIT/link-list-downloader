@@ -1,15 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Link List Downloader</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="form.css">
-    <script defer type="module" src="components/componentImports.mjs"></script>
-    <script defer type="module" src="main.mjs"></script>
-</head>
-<body>
+  </head>
+  <body>
     <h1 class="page-title">Link Downloader</h1>
     <main>
         <form id="links-form">
@@ -23,5 +20,6 @@
         <div class="separator">Preview</div>
         <div id="downloads-progress-container" class="progress-container"></div>
     </main>
-</body>
+    <script type="module" src="/src/mainPage/main.ts"></script>
+  </body>
 </html>

@@ -53,7 +53,7 @@ export class ProgressBarComponent extends HTMLElement {
     }
 
     get max() {
-        return parseFloat(this.getAttribute("max")) || 100;
+        return parseFloat(this.getAttribute("max")) || 1;
     }
 
     set percentageRounding(value) {

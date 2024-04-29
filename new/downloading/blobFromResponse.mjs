@@ -10,14 +10,17 @@ import GenericEvents from "../events/events.mjs";
  */
 export class BlobFromResponse {
 
-    #response
+    /**
+     * @protected
+     */
+    _response
 
     /**
      * Gets the response object.
      * @returns {Response} The response object.
      */
     get response() {
-        return this.#response;
+        return this._response;
     }
 
     /**
@@ -25,7 +28,7 @@ export class BlobFromResponse {
      * @param {Response} response - The response object.
      */
     constructor(response) {
-        this.#response = response;
+        this._response = response;
     }
 
     /**
@@ -53,6 +56,8 @@ export class BlobFromResponse {
      * Processes a chunk of data.
      * This is a default implementation that does not need processing.
      * @param {Uint8Array} chunk - The chunk of data to be processed.
+     * 
+     * @protected
      */
     _processChunk(chunk) {  }
 }
@@ -63,14 +68,17 @@ export class BlobFromResponse {
  */
 export class CountBlobFromResponseLength extends BlobFromResponse {
 
-    #length
+    /**
+     * @protected
+     */
+    _length
 
     /**
      * Gets the length of the blob.
      * @returns {number} The length of the blob.
      */
     get length() {
-        return this.#length;
+        return this._length;
     }
 
     /**
@@ -79,15 +87,17 @@ export class CountBlobFromResponseLength extends BlobFromResponse {
      */
     constructor(response) {
         super(response);
-        this.#length = 0;
+        this._length = 0;
     }
 
     /**
      * Processes a chunk of data and updates the length.
      * @param {Uint8Array} chunk - The chunk of data to process.
+     * 
+     * @protected
      */
     _processChunk(chunk) {
-        this.#length += chunk.length;
+        this._length += chunk.length;
     }
 }
 
@@ -123,10 +133,11 @@ export class CountBlobFromResponseLengthProgress extends CountBlobFromResponseLe
     /**
      * Processes a chunk of data.
      * @param {Uint8Array} chunk - The chunk of data to process.
+     * 
+     * @protected
      */
     _processChunk(chunk) {
         super._processChunk(chunk);
-        this.#progressEvents.dispatchEvent("size", this.length);
-        this.#progressEvents.dispatchEvent("progress", chunk.length)
+        this.#progressEvents.dispatchEvent("progress", { progress: chunk.length, totalProgress: this._length });
     }
 }

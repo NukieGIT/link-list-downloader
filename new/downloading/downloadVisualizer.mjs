@@ -73,11 +73,11 @@ export default class DownloadVisualizer {
         this.#totalProgressBar.name = "Total"
         this.#totalProgressBar.unitConverter = DownloadVisualizer.#unitConverter
 
-        this.#downloadManager.fetchTotalFileSizeEvents.addEventListener("fetchstarted", e => {
+        this.#downloadManager.fetchTotalFileSizeEvents.addEventListener("start", e => {
             this.#targetTotalElement.appendChild(this.#totalProgressBar)
         })
 
-        this.#downloadManager.fetchTotalFileSizeEvents.addEventListener("fetchfinished", e => {
+        this.#downloadManager.fetchTotalFileSizeEvents.addEventListener("finish", e => {
             this.#totalProgressBar.max = this.#downloadManager.totalFileSize
         })
 
@@ -92,19 +92,19 @@ export default class DownloadVisualizer {
     #registerEvents(urlDownloader) {
         const progressBar = this.#progressBarMap.get(urlDownloader)
 
-        urlDownloader.fetchFileSizeEvents.addEventListener("fetchfilesizestarted", e => {
+        urlDownloader.fetchFileSizeEvents.addEventListener("start", e => {
             this.#targetDownloadsElement.appendChild(progressBar)
         })
         
-        urlDownloader.fetchFileSizeEvents.addEventListener("fetchfilesizefinished", e => {
+        urlDownloader.fetchFileSizeEvents.addEventListener("finish", e => {
             progressBar.max = urlDownloader.fileSize
         })
 
-        urlDownloader.downloadEvents.addEventListener("downloadprogress", e => {
+        urlDownloader.downloadEvents.addEventListener("progress", e => {
             progressBar.value = urlDownloader.downloadedFileSize
         })
 
-        urlDownloader.downloadEvents.addEventListener("downloadfinished", e => {
+        urlDownloader.downloadEvents.addEventListener("finish", e => {
             this.#targetDownloadsElement.removeChild(progressBar)
         })
     }

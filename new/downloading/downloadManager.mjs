@@ -15,37 +15,37 @@ export default class DownloadManager {
     /**
      * @type {UrlDownloader[]}
      */
-    #urlDownloaders
+    #urlDownloaders = []
 
     /**
      * @type {number}
      */
-    #totalFileSize
+    #totalFileSize = 0
 
     /**
      * @type {GenericEvents<FetchTotalFileSizeEventMap>}
      */
-    #fetchTotalFileSizeEvents
+    #fetchTotalFileSizeEvents = new GenericEvents()
 
     /**
      * @type {number}
      */
-    #downloadedFileSize
+    #downloadedFileSize = 0
 
     /**
      * @type {GenericEvents<DownloadedFileSizeEventMap>}
      */
-    #downloadedFileSizeEvents
+    #downloadedFileSizeEvents = new GenericEvents()
 
     /**
      * @type {number}
      */
-    #downloadedFilesCount
+    #downloadedFilesCount = 0
 
     /**
      * @type {GenericEvents<DownloadedFilesCountEventMap>}
      */
-    #downloadedFilesCountEvents
+    #downloadedFilesCountEvents = new GenericEvents()
 
     /**
      * @type {readonly LimitedUrlDownloader[]}
@@ -83,15 +83,6 @@ export default class DownloadManager {
      */
     constructor(urls) {
         this.#urls = urls
-        this.#urlDownloaders = []
-
-        this.#totalFileSize = 0
-        this.#downloadedFileSize = 0
-        this.#downloadedFilesCount = 0
-
-        this.#fetchTotalFileSizeEvents = new GenericEvents()
-        this.#downloadedFileSizeEvents = new GenericEvents()
-        this.#downloadedFilesCountEvents = new GenericEvents()
 
         this.#createUrlDownloaders()
     }
@@ -105,13 +96,13 @@ export default class DownloadManager {
 
     async downloadAll() {
         await Promise.allSettled(this.#urlDownloaders.map(async urlDownloader => {
-            const rmEvt = urlDownloader.downloadEvents.addEventListener("downloadprogress", e => {
+            const unsubscribeDownloadProgress = urlDownloader.downloadEvents.addEventListener("progress", e => {
                 this.#downloadedFileSize += e.detail.loadedBytes
                 this.#downloadedFileSizeEvents.dispatchEvent("progress", { size: e.detail.loadedBytes })
             })
 
             const blob = await urlDownloader.download()
-            rmEvt()
+            unsubscribeDownloadProgress()
 
             this.#downloadedFilesCount++
             this.#downloadedFilesCountEvents.dispatchEvent("progress", { count: this.#downloadedFilesCount })
@@ -123,7 +114,8 @@ export default class DownloadManager {
     }
 
     async fetchTotalFileSize() {
-        this.#fetchTotalFileSizeEvents.dispatchEvent("fetchstarted", null)
+        this.#fetchTotalFileSizeEvents.dispatchEvent("start", null)
+        
         await Promise.allSettled(this.#urlDownloaders.map(async urlDownloader => {
             const fileSize = await urlDownloader.fetchFileSize()
             this.#fetchTotalFileSizeEvents.dispatchEvent("progress", { size: fileSize })
@@ -133,7 +125,7 @@ export default class DownloadManager {
             return fileSize
         }))
 
-        this.#fetchTotalFileSizeEvents.dispatchEvent("fetchfinished", null)
+        this.#fetchTotalFileSizeEvents.dispatchEvent("finish", null)
 
         return this.#totalFileSize
     }

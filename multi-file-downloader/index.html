@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Link List Downloader</title>
+  </head>
+  <body>
+    <h1 class="page-title">Link Downloader</h1>
+    <main>
+        <form id="links-form">
+            <textarea placeholder="Direct download links or links to text files with download links" name="text-input" cols="30" rows="10" class="download-links-textarea"></textarea>
+            <div class="separator">and/or</div>
+            <input name="file-input" type="file" multiple accept="text/plain">
+            <button type="submit">Download</button>
+        </form>
+        <div class="separator">Total Progress</div>
+        <div id="total-progress-container" class="progress-total progress-container"></div>
+        <div class="separator">Preview</div>
+        <div id="downloads-progress-container" class="progress-container"></div>
+    </main>
+    <script type="module" src="/src/mainPage/main.ts"></script>
+  </body>
+</html>

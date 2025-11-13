@@ -1,18 +1,18 @@
 import NamedProgressBarComponent from "@/components/namedProgressBarComponent"
 import { getDataUnit, convertDataUnit } from "@/utils"
-import DownloadManager from "./downloadManager"
-import UrlDownloader from "./urlDownloader"
+import DownloadManager from "./urlDownloader"
+import MultiDownloadManager from "./downloadsManager"
 
 export default class DownloadVisualizer {
-    #_downloadManager: DownloadManager
+    #_downloadsManager: MultiDownloadManager
     #_targetTotalElement: HTMLElement
     #_targetDownloadsElement: HTMLElement
 
-    #_progressBarMap: Map<Omit<UrlDownloader, "fetchFileSize" | "download" | "close">, NamedProgressBarComponent> = new Map()
+    #_progressBarMap: Map<DownloadManager, NamedProgressBarComponent> = new Map()
     #_totalProgressBar: NamedProgressBarComponent | null = null
 
-    constructor(downloadManager: DownloadManager, targetTotalElement: HTMLElement, targetDownloadsElement: HTMLElement) {
-        this.#_downloadManager = downloadManager
+    constructor(downloadsManager: MultiDownloadManager, targetTotalElement: HTMLElement, targetDownloadsElement: HTMLElement) {
+        this.#_downloadsManager = downloadsManager
         this.#_targetTotalElement = targetTotalElement
         this.#_targetDownloadsElement = targetDownloadsElement
 
@@ -22,13 +22,13 @@ export default class DownloadVisualizer {
     #prepare() {
         this.#prepareTotalProgressBar()
 
-        for (const urlDownloader of this.#_downloadManager.urlDownloaders) {
+        for (const urlDownloader of this.#_downloadsManager.urlDownloadManagers) {
             this.#createProgressBars(urlDownloader)
             this.#registerEvents(urlDownloader)
         }
     }
 
-    #createProgressBars(urlDownloader: UrlDownloader) {
+    #createProgressBars(urlDownloader: DownloadManager) {
         const progressBar = new NamedProgressBarComponent()
 
         progressBar.name = urlDownloader.fileName
@@ -43,39 +43,39 @@ export default class DownloadVisualizer {
         this.#_totalProgressBar.name = "Total"
         this.#_totalProgressBar.unitConverter = DownloadVisualizer.#unitConverter
 
-        this.#_downloadManager.fetchTotalFileSizeEvents.addEventListener("start", () => {
+        this.#_downloadsManager.fetchTotalFileSizeEvents.addEventListener("start", () => {
             this.#_targetTotalElement.appendChild(this.#_totalProgressBar!)
         })
 
-        this.#_downloadManager.fetchTotalFileSizeEvents.addEventListener("finish", () => {
-            this.#_totalProgressBar!.max = this.#_downloadManager.totalFileSize
+        this.#_downloadsManager.fetchTotalFileSizeEvents.addEventListener("finish", () => {
+            this.#_totalProgressBar!.max = this.#_downloadsManager.totalFileSize
         })
 
-        this.#_downloadManager.downloadedFileSizeEvents.addEventListener("progress", () => {
-            this.#_totalProgressBar!.value = this.#_downloadManager.downloadedFileSize
+        this.#_downloadsManager.downloadedFileSizeEvents.addEventListener("progress", () => {
+            this.#_totalProgressBar!.value = this.#_downloadsManager.downloadedFileSize
         })
     }
 
-    #registerEvents(urlDownloader: UrlDownloader) {
-        const progressBar = this.#_progressBarMap.get(urlDownloader)
+    #registerEvents(urlDownloadManager: DownloadManager) {
+        const progressBar = this.#_progressBarMap.get(urlDownloadManager)
 
         if (!progressBar) {
             return
         }
 
-        urlDownloader.fetchFileSizeEvents.addEventListener("start", () => {
+        urlDownloadManager.fileSizeEvents.addEventListener("start", () => {
             this.#_targetDownloadsElement.appendChild(progressBar)
         })
         
-        urlDownloader.fetchFileSizeEvents.addEventListener("finish", () => {
-            progressBar.max = urlDownloader.fileSize
+        urlDownloadManager.fileSizeEvents.addEventListener("finish", () => {
+            progressBar.max = urlDownloadManager.fileSize
         })
 
-        urlDownloader.downloadEvents.addEventListener("progress", () => {
-            progressBar.value = urlDownloader.downloadedFileSize
+        urlDownloadManager.downloadEvents.addEventListener("progress", () => {
+            progressBar.value = urlDownloadManager.currentDownloadedFileSize
         })
 
-        urlDownloader.downloadEvents.addEventListener("finish", () => {
+        urlDownloadManager.downloadEvents.addEventListener("finish", () => {
             this.#_targetDownloadsElement.removeChild(progressBar)
         })
     }

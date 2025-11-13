@@ -8,7 +8,7 @@ export interface IEventListenerHandler<T> {
 
 export type EventListenerOrEventListenerHandler<T> = EventListenerHandler<T> | IEventListenerHandler<T>;
 
-export interface IEventListener<T extends EventMap> {
+export interface IEventController<T extends EventMap> {
     /**
      * Adds an event listener of the specified type.
      * Returns a function that can be called to remove the event listener.
@@ -32,11 +32,11 @@ export interface IEventListener<T extends EventMap> {
  * 
  * @template T - The event map.
  */
-export class TypedEventTarget<T extends EventMap> implements IEventListener<T> {
+export class TypedEventTarget<T extends EventMap> implements IEventController<T> {
     #_eventTarget = new EventTarget();
 
     public get eventListener() {
-        return this as IEventListener<T>;
+        return this as IEventController<T>;
     }
 
     public addEventListener<K extends keyof T>(

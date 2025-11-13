@@ -1,8 +1,8 @@
 import './style.css'
 import './form.css'
 import '@/components/componentImports'
-import DownloadManager from '@/downloading/downloadManager'
-import DownloadVisualizer from '@/downloading/downloadVisualizer'
+import MultiDownloadManager from '@/downloading/downloadsManager'
+// import DownloadVisualizer from '@/downloading/downloadVisualizer'
 
 const urls = [
     "https://link.testfile.org/500MB",
@@ -13,12 +13,12 @@ const urls = [
     "https://link.testfile.org/500MB"
 ]
 
-const totalProgressContainer = document.getElementById('total-progress-container') as HTMLDivElement
-const downloadProgressContainer = document.getElementById('downloads-progress-container') as HTMLDivElement
+// const totalProgressContainer = document.getElementById('total-progress-container') as HTMLDivElement
+// const downloadProgressContainer = document.getElementById('downloads-progress-container') as HTMLDivElement
 
 
-const downloadManager = new DownloadManager(urls)
-new DownloadVisualizer(downloadManager, totalProgressContainer, downloadProgressContainer)
+const downloadManager = new MultiDownloadManager(urls)
+// new DownloadVisualizer(downloadManager, totalProgressContainer, downloadProgressContainer)
 
 downloadManager.fetchTotalFileSize()
-downloadManager.downloadAll()
+// downloadManager.downloadAll()

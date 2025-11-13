@@ -1,5 +1,5 @@
-import { IEventListener, TypedEventTarget } from "@/events/events";
-import { CountBlobFromResponseLengthProgressEventMap } from "./types/downloadTypes";
+import { IEventController, TypedEventTarget } from "@/events/events";
+import { ToBlobEventMap } from "./types/downloadTypes";
 
 /**
  * Represents a class that converts a response into a Blob.
@@ -58,7 +58,7 @@ export class BlobFromResponse {
  */
 export class BlobFromResponseTracked extends BlobFromResponse {
 
-    #_progressEvents: TypedEventTarget<CountBlobFromResponseLengthProgressEventMap>
+    #_progressEvents: TypedEventTarget<ToBlobEventMap>
 
     #_length = 0
 
@@ -72,7 +72,7 @@ export class BlobFromResponseTracked extends BlobFromResponse {
     /**
      * Gets the progress events.
      */
-    get progressEvents(): IEventListener<CountBlobFromResponseLengthProgressEventMap> {
+    get progressEvents(): IEventController<ToBlobEventMap> {
         return this.#_progressEvents.eventListener;
     }
 
@@ -83,6 +83,6 @@ export class BlobFromResponseTracked extends BlobFromResponse {
 
     protected processChunk(chunk: Uint8Array) {
         this.#_length += chunk.length;
-        this.#_progressEvents.dispatchEvent("progress", { progress: chunk.length, totalProgress: this.#_length });
+        this.#_progressEvents.dispatchEvent("progress", { progressDelta: chunk.length, totalProgress: this.#_length });
     }
 }

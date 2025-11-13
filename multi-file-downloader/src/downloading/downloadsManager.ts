@@ -1,11 +1,11 @@
 import { TypedEventTarget } from "@/events/events"
 import { FetchTotalFileSizeEventMap, DownloadedFileSizeEventMap, DownloadedFilesCountEventMap } from "./types/downloadTypes"
-import UrlDownloader from "./urlDownloader"
+import DownloadManager from "./urlDownloader"
 
-export default class DownloadManager {
+export default class MultiDownloadManager {
 
     #_urls: string[]
-    #_urlDownloaders: UrlDownloader[] = []
+    #_urlDownloaders: DownloadManager[] = []
     #_totalFileSize: number = 0
     #_downloadedFileSize: number = 0
     #_downloadedFilesCount: number = 0
@@ -14,8 +14,8 @@ export default class DownloadManager {
     #_downloadedFileSizeEvents: TypedEventTarget<DownloadedFileSizeEventMap> = new TypedEventTarget()
     #_downloadedFilesCountEvents: TypedEventTarget<DownloadedFilesCountEventMap> = new TypedEventTarget()
 
-    get urlDownloaders() {
-        return this.#_urlDownloaders.map(ud => ud.limitedUrlDownloader)
+    get urlDownloadManagers() {
+        return this.#_urlDownloaders.map(ud => ud.limitedUrlDownloadManager)
     }
 
     get totalFileSize() {
@@ -50,16 +50,15 @@ export default class DownloadManager {
 
     #_createUrlDownloaders() {
         for (const url of this.#_urls) {
-            const urlDownloader = new UrlDownloader(url)
-            this.#_urlDownloaders.push(urlDownloader)
+            this.#_urlDownloaders.push(new DownloadManager(url))
         }
     }
 
     async downloadAll() {
         await Promise.allSettled(this.#_urlDownloaders.map(async urlDownloader => {
             const unsubscribeDownloadProgress = urlDownloader.downloadEvents.addEventListener("progress", e => {
-                this.#_downloadedFileSize += e.detail.loadedBytes
-                this.#_downloadedFileSizeEvents.dispatchEvent("progress", { size: e.detail.loadedBytes })
+                this.#_downloadedFileSize += e.detail.progressDelta
+                this.#_downloadedFileSizeEvents.dispatchEvent("progress", { size: e.detail.progressDelta })
             })
 
             const blob = await urlDownloader.download()
@@ -71,7 +70,7 @@ export default class DownloadManager {
             return blob
         }))
 
-        return this.#_downloadedFileSize
+        // gib blobs or sumthin
     }
 
     async fetchTotalFileSize() {

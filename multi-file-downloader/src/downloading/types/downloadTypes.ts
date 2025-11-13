@@ -1,31 +1,29 @@
-import type { EventMap } from "@/events/events"
-
 export type DownloadEventTypesMap = {
-    "start": { id: number }
-    "error": { id: number, status: number, statusText: string }
-    "progress": { id: number, loadedBytes: number }
-    "finish": { id: number }
-} & EventMap
+    "start": null
+    "error": { status: number, statusText: string }
+    "progress": { progressDelta: number }
+    "finish": null
+}
 
 export type FetchFileSizeEventMap = {
-    "start": { id: number }
-    "finish": { id: number }
-} & EventMap
+    "start": null
+    "finish": null
+}
 
-export type CountBlobFromResponseLengthProgressEventMap = {
-    "progress": { progress: number, totalProgress: number }
-} & EventMap
+export type ToBlobEventMap = {
+    "progress": { progressDelta: number, totalProgress: number }
+}
 
 export type FetchTotalFileSizeEventMap = {
     "start": null
     "progress": { size: number}
     "finish": null
-} & EventMap
+}
 
 export type DownloadedFileSizeEventMap = {
     "progress": { size: number }
-} & EventMap
+}
 
 export type DownloadedFilesCountEventMap = {
     "progress": { count: number }
-} & EventMap
+}
